@@ -18,6 +18,14 @@ export class UsersService {
     }
   }
 
+  async findOne(username: string): Promise<User | undefined> {
+    return await this.userRepository.findOne({
+      where: {
+        username: username
+      }
+    });
+  }
+
   async createUser(userDetails: CreateUserParams): Promise<User> {
     try {
       const newUser = this.userRepository.create({ ...userDetails, createdAt: new Date() })
