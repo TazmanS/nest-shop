@@ -1,42 +1,24 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm'
-import { User } from 'src/typeorm/entities/User';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { errors } from 'src/utils/errors';
 import { CreateUserParams, UpdateUserParams } from 'src/utils/types';
-import { Repository } from 'typeorm'
+import { User, UserDocument } from './shemas/user.schema';
 
 @Injectable()
 export class UsersService {
 
-  constructor(@InjectRepository(User) private userRepository: Repository<User>) { }
+  constructor(
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>
+  ) { }
 
-  async getUsers(): Promise<User[]> {
+  async createUser(createUserParams: CreateUserParams): Promise<User> {
     try {
-      return await this.userRepository.find()
-    } catch (e) {
-      throw new HttpException('Error', HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async findOne(username: string): Promise<User | undefined> {
-    return await this.userRepository.findOne({
-      where: {
-        username: username
-      }
-    });
-  }
-
-  async createUser(userDetails: CreateUserParams): Promise<User> {
-    try {
-      const newUser = this.userRepository.create({ ...userDetails, createdAt: new Date() })
-      return await this.userRepository.save(newUser)
+      return this.userModel.create(createUserParams)
     } catch (e) {
       throw new HttpException(errors[e.code], HttpStatus.BAD_REQUEST)
     }
-  }
-
-  updateUser(userDetails: UpdateUserParams) {
-    return
   }
 
 }
