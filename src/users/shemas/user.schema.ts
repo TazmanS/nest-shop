@@ -8,7 +8,7 @@ export class User extends Document {
 
   _id: string
 
-  @Prop({ required: true, unique: true })
+  @Prop({ unique: true, required: true })
   email: string
 
   @Prop({ required: true })

@@ -1,24 +1,38 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { errors } from 'src/utils/errors';
-import { CreateUserParams, UpdateUserParams } from 'src/utils/types';
-import { User, UserDocument } from './shemas/user.schema';
+import { CreateUserParams, UpdateUserParams } from './types';
+import { User, UserDocument } from './shemas/user.schema'
+import * as bcrypt from 'bcrypt';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
 
   constructor(
     @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>
+    private readonly userModel: Model<UserDocument>,
+
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
   ) { }
 
-  async createUser(createUserParams: CreateUserParams): Promise<User> {
-    try {
-      return this.userModel.create(createUserParams)
-    } catch (e) {
-      throw new HttpException(errors[e.code], HttpStatus.BAD_REQUEST)
-    }
+  async createPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt();
+    const hash = await bcrypt.hash(password, salt);
+    return hash
+  }
+
+  async createUser(createUserParams: CreateUserParams): Promise<any> {
+    const user = await this.userModel.create({
+      ...createUserParams,
+      password: await this.createPassword(createUserParams.password)
+    })
+    return this.authService.login(user)
+  }
+
+  async findOne(email: string): Promise<User> {
+    return await this.userModel.findOne({ email })
   }
 
 }
