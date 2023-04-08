@@ -18,6 +18,15 @@ export class User extends Document {
   // 0 - user
   @Prop({ default: 0 })
   role: number
+
+  @Prop()
+  logig: string
+
+  @Prop()
+  keep_me: boolean
+
+  @Prop()
+  email_me: boolean
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
