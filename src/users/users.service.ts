@@ -1,7 +1,7 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, HttpException, HttpCode, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUserParams, UpdateUserParams } from './types';
+import { CreateUserParams, SafeUser, UpdateUserParams } from './types';
 import { User, UserDocument } from './shemas/user.schema'
 import * as bcrypt from 'bcrypt';
 import { AuthService } from 'src/auth/auth.service';
@@ -24,15 +24,28 @@ export class UsersService {
   }
 
   async createUser(createUserParams: CreateUserParams): Promise<any> {
-    const user = await this.userModel.create({
-      ...createUserParams,
-      password: await this.createPassword(createUserParams.password)
-    })
-    return this.authService.login(user)
+    try {
+      const user = await this.userModel.create({
+        ...createUserParams,
+        password: await this.createPassword(createUserParams.password)
+      })
+      if (user) {
+        return this.authService.login(user)
+      } else {
+        throw new HttpException("Something went wrong!!!", HttpStatus.UNPROCESSABLE_ENTITY)
+      }
+    } catch (e) {
+      throw new HttpException("User already exist!", HttpStatus.UNPROCESSABLE_ENTITY)
+    }
   }
 
   async findOne(email: string): Promise<User> {
     return await this.userModel.findOne({ email })
+  }
+
+  async getProfilte({ email }): Promise<SafeUser> {
+    const user = await this.userModel.findOne({ email }, { password: false })
+    return user
   }
 
 }

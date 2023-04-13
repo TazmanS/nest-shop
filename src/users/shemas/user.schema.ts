@@ -8,6 +8,10 @@ export class User extends Document {
 
   _id: string
 
+
+  @Prop({ unique: true, required: true })
+  login: string
+
   @Prop({ unique: true, required: true })
   email: string
 
@@ -19,13 +23,10 @@ export class User extends Document {
   @Prop({ default: 0 })
   role: number
 
-  @Prop()
-  logig: string
-
-  @Prop()
+  @Prop({ default: true })
   keep_me: boolean
 
-  @Prop()
+  @Prop({ default: true })
   email_me: boolean
 }
 
