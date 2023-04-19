@@ -44,8 +44,8 @@ export class UsersService {
   }
 
   async getProfilte({ email }): Promise<SafeUser> {
-    const user = await this.userModel.findOne({ email }, { password: false })
-    return user
+    const res = await this.userModel.findOne({ email }, { password: false })
+    return res
   }
 
 }

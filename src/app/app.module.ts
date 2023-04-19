@@ -3,6 +3,7 @@ import { UsersModule } from '../users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { RestaurantModule } from 'src/restaurant/restaurant.module';
 
 
 @Module({
@@ -19,7 +20,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       isGlobal: true
     }),
     UsersModule,
-    AuthModule
+    AuthModule,
+    RestaurantModule
   ],
   controllers: [],
   providers: [],
